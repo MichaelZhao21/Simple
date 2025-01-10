@@ -11,7 +11,7 @@ class PreferencesManager(context: Context) {
     }
 
     fun getNumber(widgetId: Int): Int {
-        return prefs.getInt(getWidgetKey(widgetId), 0)
+        return prefs.getInt(getWidgetKey(widgetId), 1)
     }
 
     private fun getWidgetKey(widgetId: Int): String {

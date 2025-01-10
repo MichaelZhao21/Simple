@@ -3,9 +3,14 @@ package xyz.michaelzhao.simple
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.RemoteViews
+import android.widget.RemoteViews.RemoteView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import xyz.michaelzhao.simple.ui.theme.SimpleTheme
 
 class TextAppsWidgetConfigActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,16 +58,30 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
             MaterialTheme {
                 ConfigurationScreen(
                     onSave = { numberText: String ->
-                        // Save number
-                        val number =
-                            numberText.toInt() // TODO: catch conversion error or make sure it doesn't happen
-                        PreferencesManager(this).saveNumber(appWidgetId, number)
-
-                        // Update widget
                         lifecycleScope.launch {
-                            val glanceId = GlanceAppWidgetManager(this@TextAppsWidgetConfigActivity)
-                                .getGlanceIdBy(appWidgetId)
-                            TextAppsWidget().update(this@TextAppsWidgetConfigActivity, glanceId)
+                            // Save number
+                            val number =
+                                numberText.toInt() // TODO: catch conversion error or make sure it doesn't happen
+                            PreferencesManager(this@TextAppsWidgetConfigActivity).saveNumber(
+                                appWidgetId,
+                                number
+                            )
+
+                            // Update widget
+                            try {
+                                val glanceId =
+                                    GlanceAppWidgetManager(this@TextAppsWidgetConfigActivity)
+                                        .getGlanceIdBy(appWidgetId)
+                                updateAppWidgetState(
+                                    this@TextAppsWidgetConfigActivity,
+                                    glanceId
+                                ) { prefs ->
+                                    prefs[intPreferencesKey("widget_number")] = number
+                                }
+                                TextAppsWidget().update(this@TextAppsWidgetConfigActivity, glanceId)
+                            } catch (e: Exception) {
+                                Log.e("Widget Config", "Update failed", e)
+                            }
                         }
 
                         // Set result to OK
@@ -78,22 +101,28 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
 fun ConfigurationScreen(onSave: (String) -> Unit) {
     var numberText by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TextField(
-            value = numberText,
-            onValueChange = { numberText = it },
-            label = { Text("App Display Number") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button({ onSave(numberText) }, enabled = numberText.isNotBlank()) {
-            Text("Save")
+    SimpleTheme {
+        Box(modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextField(
+                    value = numberText,
+                    onValueChange = { numberText = it },
+                    label = { Text("App Display Number") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button({ onSave(numberText) }, enabled = numberText.isNotBlank()) {
+                    Text("Save")
+                }
+            }
         }
     }
 }

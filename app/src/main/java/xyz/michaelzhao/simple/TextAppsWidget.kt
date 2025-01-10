@@ -8,6 +8,8 @@ import androidx.glance.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -15,41 +17,46 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
 class TextAppsWidget : GlanceAppWidget() {
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            MyContent(context, id)
-        }
-    }
-
-    @Composable
-    private fun MyContent(context: Context, id: GlanceId) {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
-        val num = PreferencesManager(context).getNumber(appWidgetId).toString()
+        val num = PreferencesManager(context).getNumber(appWidgetId)
 
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            verticalAlignment = Alignment.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "App List $num",
-                style = TextStyle(color = ColorProvider(Color.White))
-            )
-            Button(
-                text = "Gmail",
-                onClick = actionStartActivity(createLaunchIntent(context, "com.google.android.gm"))
-            )
-            Button(
-                text = "Discord",
-                onClick = actionStartActivity(createLaunchIntent(context, "com.discord"))
-            )
+        updateAppWidgetState(context, id) { prefs ->
+            prefs[intPreferencesKey("widget_number")] = num
+        }
+
+        provideContent {
+            val numState = currentState<Preferences>()[intPreferencesKey("widget_number")]
+
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "App List $numState",
+                    style = TextStyle(color = ColorProvider(Color.White))
+                )
+                Button(
+                    text = "Gmail",
+                    onClick = actionStartActivity(createLaunchIntent(context, "com.google.android.gm"))
+                )
+                Button(
+                    text = "Discord",
+                    onClick = actionStartActivity(createLaunchIntent(context, "com.discord"))
+                )
+            }
         }
     }
 
