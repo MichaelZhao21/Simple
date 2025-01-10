@@ -1,5 +1,6 @@
 [versions]
-agp = "8.4.1"
+agp = "8.4.2"
+glanceVersion = "1.1.1"
 kotlin = "1.9.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -7,10 +8,13 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2023.08.00"
+composeBom = "2024.12.01"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceVersion" }
+androidx-glance-material = { module = "androidx.glance:glance-material", version.ref = "glanceVersion" }
+androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glanceVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

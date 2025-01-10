@@ -67,14 +67,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    val glanceVersion = "1.1.1"
-
     // For AppWidgets support
-    implementation("androidx.glance:glance-appwidget:$glanceVersion")
+    implementation(libs.androidx.glance.appwidget)
 
     // For interop APIs with Material 3
-    implementation("androidx.glance:glance-material3:$glanceVersion")
+    implementation(libs.androidx.glance.material3)
 
     // For interop APIs with Material 2
-    implementation("androidx.glance:glance-material:$glanceVersion")
+    implementation(libs.androidx.glance.material)
 }
