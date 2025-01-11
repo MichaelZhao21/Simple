@@ -2,12 +2,14 @@ package xyz.michaelzhao.simple
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,8 +34,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import xyz.michaelzhao.simple.ui.theme.SimpleTheme
 
@@ -57,7 +60,11 @@ class SelectAppActivity : ComponentActivity() {
     fun SelectContext(innerPadding: PaddingValues) {
         var packages by remember { mutableStateOf(listOf<Pair<String, String>>()) }
         val selected = remember { mutableStateListOf<Boolean>() }
+        val deleteDialog = remember { mutableStateOf(false) }
+
         val context = LocalContext.current
+        val editNum = intent.extras?.getInt("index") ?: -1
+        val red = MaterialTheme.colorScheme.error
 
         // Load all apps
         LaunchedEffect(Unit) {
@@ -75,8 +82,17 @@ class SelectAppActivity : ComponentActivity() {
             selected.addAll(List(packages.size) { false })
         }
 
+        // Loading if packages not loaded
         if (packages.isEmpty()) {
-            Text("Loading...", modifier = Modifier.padding(innerPadding))
+            Text(
+                "Loading...",
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxWidth(),
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                textAlign = TextAlign.Center
+            )
             return
         }
 
@@ -88,24 +104,43 @@ class SelectAppActivity : ComponentActivity() {
                     PackageEntry(pack.first, selected[i], onCheckedChange = { selected[i] = it })
                 }
             }
-            Button(
-                onClick = {
-                    val editNum = intent.extras?.getInt("index") ?: -1
-                    val newData = packages.filterIndexed { i, _ -> selected[i] }
-
-                    DataManager(context).editOrAddEntry(newData, editNum)
-
-                    context.startActivity(Intent(context, MainActivity::class.java))
-                },
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 16.dp),
-                shape = RoundedCornerShape(50)
+                horizontalAlignment = Alignment.End
             ) {
-                Text(
-                    text = "Save " + selected.count { it }.toString() + " apps",
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                if (editNum != -1) {
+                    OutlinedButton(
+                        onClick = { deleteDialog.value = true },
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonColors(
+                            contentColor = red,
+                            containerColor = Color.Transparent,
+                            disabledContentColor = red,
+                            disabledContainerColor = red
+                        ),
+                        border = BorderStroke(width = 1.dp, color = red)
+                    ) {
+                        Text("Delete")
+                    }
+                }
+                Button(
+                    onClick = {
+                        val newData = packages.filterIndexed { i, _ -> selected[i] }
+
+                        DataManager(context).editOrAddEntry(newData, editNum)
+
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                    },
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text(
+                        text = "Save " + selected.count { it }.toString() + " apps",
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
             }
         }
     }

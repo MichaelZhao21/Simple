@@ -1,13 +1,12 @@
 package xyz.michaelzhao.simple
 
 import android.content.Context
-import android.util.Log
 
 // Serialization format: package|label++package|label++package|label###package|label++package|label++package|label++package|label
 class DataManager(context: Context) {
     private val pm = PreferencesManager(context)
 
-    private fun loadData(): List<List<Pair<String, String>>> {
+    fun loadData(): List<List<Pair<String, String>>> {
         val data = pm.getAppData() ?: ""
 
         if (data == "")
