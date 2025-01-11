@@ -35,10 +35,11 @@ class TextAppsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         val num = PreferencesManager(context).getNumber(appWidgetId)
+        val hidePage = PreferencesManager(context).getHidePage(appWidgetId)
 
         updateAppWidgetState(context, id) { prefs ->
             prefs[intPreferencesKey("widget_number")] = num
-            prefs[booleanPreferencesKey("hide_page_num")] = false
+            prefs[booleanPreferencesKey("hide_page_num")] = hidePage
             prefs[intPreferencesKey("version")] = 0
         }
 
