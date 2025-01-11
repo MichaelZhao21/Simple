@@ -42,4 +42,12 @@ class DataManager(context: Context) {
 
         saveData(data)
     }
+
+    fun deleteEntry(index: Int) {
+        val data = loadData().toMutableList()
+
+        data.removeAt(index)
+
+        saveData(data)
+    }
 }

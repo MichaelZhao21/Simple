@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -62,11 +63,11 @@ class SelectAppActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun SelectContext(innerPadding: PaddingValues) {
         var packages by remember { mutableStateOf(listOf<Pair<String, String>>()) }
         val selected = remember { mutableStateListOf<Boolean>() }
-        val deleteDialog = remember { mutableStateOf(false) }
 
         val context = LocalContext.current
         val editNum = intent.extras?.getInt("index") ?: -1
@@ -118,7 +119,10 @@ class SelectAppActivity : ComponentActivity() {
             ) {
                 if (editNum != -1) {
                     OutlinedButton(
-                        onClick = { deleteDialog.value = true },
+                        onClick = {
+                            DataManager(context).deleteEntry(editNum)
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        },
                         shape = RoundedCornerShape(50),
                         colors = ButtonColors(
                             contentColor = red,
