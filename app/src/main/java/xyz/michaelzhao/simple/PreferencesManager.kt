@@ -14,6 +14,14 @@ class PreferencesManager(context: Context) {
         return prefs.getInt(getWidgetKey(widgetId), 1)
     }
 
+    fun getAppData(): String? {
+        return prefs.getString("data", "")
+    }
+
+    fun saveAppData(data: String) {
+        prefs.edit().putString("data", data).apply()
+    }
+
     private fun getWidgetKey(widgetId: Int): String {
         return "widget_num_$widgetId"
     }

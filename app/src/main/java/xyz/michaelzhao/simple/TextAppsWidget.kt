@@ -54,6 +54,8 @@ class TextAppsWidget : GlanceAppWidget() {
                         packageName = "com.google.android.gm"
                     )
                     AppButton(context = context, display = "Discord", packageName = "com.discord")
+                    AppButton(context = context, display = "Duolingo", packageName = "com.duolingo")
+                    AppButton(context = context, display = "Slack", packageName = "com.Slack")
                     Text(
                         "App List $numState",
                         modifier = GlanceModifier.padding(top = 4.dp),
