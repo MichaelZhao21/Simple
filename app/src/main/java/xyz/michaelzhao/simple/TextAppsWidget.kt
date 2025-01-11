@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,39 +31,43 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 
 class TextAppsWidget : GlanceAppWidget() {
-
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         val num = PreferencesManager(context).getNumber(appWidgetId)
 
         updateAppWidgetState(context, id) { prefs ->
             prefs[intPreferencesKey("widget_number")] = num
+            prefs[intPreferencesKey("version")] = 0
         }
 
         provideContent {
-            val numState = currentState<Preferences>()[intPreferencesKey("widget_number")]
-
             GlanceTheme {
-                Column(
-                    modifier = GlanceModifier.fillMaxSize(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    AppButton(
-                        context = context,
-                        display = "Gmail",
-                        packageName = "com.google.android.gm"
-                    )
-                    AppButton(context = context, display = "Discord", packageName = "com.discord")
-                    AppButton(context = context, display = "Duolingo", packageName = "com.duolingo")
-                    AppButton(context = context, display = "Slack", packageName = "com.Slack")
-                    Text(
-                        "App List $numState",
-                        modifier = GlanceModifier.padding(top = 4.dp),
-                        style = TextStyle(color = ColorProvider(Color.Gray))
-                    )
+                WidgetContent(context)
+            }
+        }
+    }
+
+    @Composable
+    private fun WidgetContent(context: Context) {
+        val dm = remember { DataManager(context) }
+        val data = dm.loadData()
+        val numState = currentState<Preferences>()[intPreferencesKey("widget_number")] ?: 0
+
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
+            if (numState < data.size) {
+                data[numState].map {
+                    AppButton(context = context, display = it.first, packageName = it.second)
                 }
             }
+            Text(
+                "App List $numState",
+                modifier = GlanceModifier.padding(top = 4.dp),
+                style = TextStyle(color = ColorProvider(Color.Gray))
+            )
         }
     }
 

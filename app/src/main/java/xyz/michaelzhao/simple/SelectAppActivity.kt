@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import xyz.michaelzhao.simple.ui.theme.SimpleTheme
+import java.util.Date
 
 class SelectAppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,6 +136,20 @@ class SelectAppActivity : ComponentActivity() {
                         val newData = packages.filterIndexed { i, _ -> selected[i] }
 
                         DataManager(context).editOrAddEntry(newData, editNum)
+
+                        // Reload all widgets
+                        lifecycleScope.launch {
+                            TextAppsWidget().updateAll(this@SelectAppActivity)
+
+                            GlanceAppWidgetManager(this@SelectAppActivity).getGlanceIds(
+                                TextAppsWidget::class.java
+                            )
+                                .forEach { id ->
+                                    updateAppWidgetState(this@SelectAppActivity, id) { pref ->
+                                        pref[intPreferencesKey("version")] = Date().time.toInt()
+                                    }
+                                }
+                        }
 
                         context.startActivity(Intent(context, MainActivity::class.java))
                     },

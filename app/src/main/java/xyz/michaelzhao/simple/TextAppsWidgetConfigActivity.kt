@@ -33,6 +33,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import xyz.michaelzhao.simple.ui.theme.SimpleTheme
+import java.util.Date
 
 class TextAppsWidgetConfigActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +75,7 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
                                     glanceId
                                 ) { prefs ->
                                     prefs[intPreferencesKey("widget_number")] = number
+                                    prefs[intPreferencesKey("version")] = Date().time.toInt()
                                 }
                                 TextAppsWidget().update(this@TextAppsWidgetConfigActivity, glanceId)
                             } catch (e: Exception) {
