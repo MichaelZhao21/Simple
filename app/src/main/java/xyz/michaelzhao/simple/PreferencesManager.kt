@@ -7,11 +7,19 @@ class PreferencesManager(context: Context) {
     private val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
 
     fun saveNumber(widgetId: Int, number: Int) {
-        prefs.edit().putInt(getWidgetKey(widgetId), number).apply()
+        prefs.edit().putInt(getWidgetKey("widget_num_", widgetId), number).apply()
     }
 
     fun getNumber(widgetId: Int): Int {
-        return prefs.getInt(getWidgetKey(widgetId), 1)
+        return prefs.getInt(getWidgetKey("widget_num_", widgetId), 1)
+    }
+
+    fun saveHidePage(widgetId: Int, value: Boolean) {
+        prefs.edit().putBoolean(getWidgetKey("widget_hide_", widgetId), value).apply()
+    }
+
+    fun getHidePage(widgetId: Int): Boolean {
+        return prefs.getBoolean(getWidgetKey("widget_hide_", widgetId), false)
     }
 
     fun getAppData(): String? {
@@ -22,11 +30,12 @@ class PreferencesManager(context: Context) {
         prefs.edit().putString("data", data).apply()
     }
 
-    private fun getWidgetKey(widgetId: Int): String {
-        return "widget_num_$widgetId"
+    private fun getWidgetKey(pre: String, widgetId: Int): String {
+        return "$pre$widgetId"
     }
 
     fun removeWidget(widgetId: Int) {
-        prefs.edit().remove(getWidgetKey(widgetId)).apply()
+        prefs.edit().remove(getWidgetKey("widget_num_", widgetId)).apply()
+        prefs.edit().remove(getWidgetKey("Widget_hide_", widgetId)).apply()
     }
 }

@@ -7,16 +7,18 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -27,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
@@ -50,31 +54,37 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
             return
         }
 
+        val glanceId =
+            GlanceAppWidgetManager(this@TextAppsWidgetConfigActivity)
+                .getGlanceIdBy(appWidgetId)
+        val preferencesManager = PreferencesManager(this@TextAppsWidgetConfigActivity)
+
+        val prevNumber = preferencesManager.getNumber(appWidgetId)
+        val prevHide = preferencesManager.getHidePage(appWidgetId)
+
         setResult(RESULT_CANCELED)
 
         setContent {
             MaterialTheme {
                 ConfigurationScreen(
-                    onSave = { numberText: String ->
+                    prevNumber,
+                    prevHide,
+                    onSave = { numberText: String, hidePageNumber: Boolean ->
                         lifecycleScope.launch {
                             // Save number
                             val number =
                                 numberText.toInt() // TODO: catch conversion error or make sure it doesn't happen
-                            PreferencesManager(this@TextAppsWidgetConfigActivity).saveNumber(
-                                appWidgetId,
-                                number
-                            )
+                            preferencesManager.saveNumber(appWidgetId, number)
+                            preferencesManager.saveHidePage(appWidgetId, hidePageNumber)
 
                             // Update widget
                             try {
-                                val glanceId =
-                                    GlanceAppWidgetManager(this@TextAppsWidgetConfigActivity)
-                                        .getGlanceIdBy(appWidgetId)
                                 updateAppWidgetState(
                                     this@TextAppsWidgetConfigActivity,
                                     glanceId
                                 ) { prefs ->
                                     prefs[intPreferencesKey("widget_number")] = number
+                                    prefs[booleanPreferencesKey("hide_page_num")] = hidePageNumber
                                     prefs[intPreferencesKey("version")] = Date().time.toInt()
                                 }
                                 TextAppsWidget().update(this@TextAppsWidgetConfigActivity, glanceId)
@@ -97,29 +107,50 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
 }
 
 @Composable
-fun ConfigurationScreen(onSave: (String) -> Unit) {
-    var numberText by remember { mutableStateOf("") }
+fun ConfigurationScreen(prevNumber: Int, prevHide: Boolean, onSave: (String, Boolean) -> Unit) {
+    var numberText by remember { mutableStateOf(prevNumber.toString()) }
+    var hidePageNumber by remember { mutableStateOf(prevHide) }
 
     SimpleTheme {
-        Box(modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .fillMaxSize()) {
-            Column(
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            Box(
                 modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(innerPadding)
             ) {
-                TextField(
-                    value = numberText,
-                    onValueChange = { numberText = it },
-                    label = { Text("App Display Number") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button({ onSave(numberText) }, enabled = numberText.isNotBlank()) {
-                    Text("Save")
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                ) {
+                    Text(
+                        text = "Widget Configuration",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 32.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = numberText,
+                        onValueChange = { numberText = it },
+                        label = { Text("App Display Number") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = hidePageNumber,
+                            onCheckedChange = { hidePageNumber = it })
+                        Text("Hide Page Number")
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        { onSave(numberText, hidePageNumber) },
+                        enabled = numberText.isNotBlank()
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
         }

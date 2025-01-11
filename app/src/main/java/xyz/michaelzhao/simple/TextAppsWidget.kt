@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -37,6 +38,7 @@ class TextAppsWidget : GlanceAppWidget() {
 
         updateAppWidgetState(context, id) { prefs ->
             prefs[intPreferencesKey("widget_number")] = num
+            prefs[booleanPreferencesKey("hide_page_num")] = false
             prefs[intPreferencesKey("version")] = 0
         }
 
@@ -52,6 +54,8 @@ class TextAppsWidget : GlanceAppWidget() {
         val dm = remember { DataManager(context) }
         val data = dm.loadData()
         val numState = currentState<Preferences>()[intPreferencesKey("widget_number")] ?: 0
+        val hidePageNum =
+            currentState<Preferences>()[booleanPreferencesKey("hide_page_num")] ?: false
 
         Column(
             modifier = GlanceModifier.fillMaxSize(),
@@ -63,11 +67,13 @@ class TextAppsWidget : GlanceAppWidget() {
                     AppButton(context = context, display = it.first, packageName = it.second)
                 }
             }
-            Text(
-                "App List $numState",
-                modifier = GlanceModifier.padding(top = 4.dp),
-                style = TextStyle(color = ColorProvider(Color.Gray))
-            )
+            if (!hidePageNum) {
+                Text(
+                    "App List $numState",
+                    modifier = GlanceModifier.padding(top = 4.dp),
+                    style = TextStyle(color = ColorProvider(Color.Gray))
+                )
+            }
         }
     }
 
