@@ -4,7 +4,7 @@ The point of this app is to simplify your phone desktop and ONLY have text as yo
 
 ## Pictures
 
-![images/desktop.png](phone desktop with simple text apps)
+![phone desktop with simple text apps](images/desktop.png)
 
 ## Installation
 
