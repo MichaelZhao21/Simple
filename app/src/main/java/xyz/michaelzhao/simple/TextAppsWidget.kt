@@ -24,6 +24,7 @@ import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
@@ -64,8 +65,20 @@ class TextAppsWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Start
         ) {
             if (numState < data.size) {
-                data[numState].map {
-                    AppButton(context = context, display = it.first, packageName = it.second)
+                data[numState].chunked(10).map { dataGroup ->
+                    Column(
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        dataGroup.map {
+                            AppButton(
+                                context = context,
+                                display = it.first,
+                                packageName = it.second
+                            )
+                        }
+                    }
                 }
             }
             if (!hidePageNum) {
@@ -94,7 +107,7 @@ class TextAppsWidget : GlanceAppWidget() {
                 color = GlanceTheme.colors.secondary,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
+                fontSize = 30.sp
             )
         )
     }

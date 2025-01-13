@@ -2,6 +2,7 @@ package xyz.michaelzhao.simple
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -83,9 +84,17 @@ class SelectAppActivity : ComponentActivity() {
                     it.activityInfo.packageName as String,
                 )
             }
+
             val sortedPackages = loadedPackages.sortedBy { it.first }
             packages = sortedPackages
+
             selected.addAll(List(packages.size) { false })
+            if (editNum != -1) {
+                val data = DataManager(context).loadData()[editNum]
+                sortedPackages.forEachIndexed { i, _ ->
+                    selected[i] = data.contains(sortedPackages[i])
+                }
+            }
         }
 
         // Loading if packages not loaded
