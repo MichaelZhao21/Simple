@@ -132,7 +132,6 @@ fun ConfigurationScreen(prevNumber: Int, prevHide: Boolean, onSave: (String, Boo
     else
         Icons.Filled.KeyboardArrowDown
     var fieldErr: Boolean
-
     try {
         val n = numberText.toInt()
         fieldErr = n < 0 || n >= data.size

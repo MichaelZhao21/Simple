@@ -53,7 +53,6 @@ class SelectAppActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-
         setContent {
             SimpleTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
