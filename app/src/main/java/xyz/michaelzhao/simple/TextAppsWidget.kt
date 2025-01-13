@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -37,10 +38,12 @@ class TextAppsWidget : GlanceAppWidget() {
         val appWidgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         val num = PreferencesManager(context).getNumber(appWidgetId)
         val hidePage = PreferencesManager(context).getHidePage(appWidgetId)
+        val fontSize = PreferencesManager(context).getFontSize(appWidgetId)
 
         updateAppWidgetState(context, id) { prefs ->
             prefs[intPreferencesKey("widget_number")] = num
             prefs[booleanPreferencesKey("hide_page_num")] = hidePage
+            prefs[floatPreferencesKey("font_size")] = fontSize
             prefs[intPreferencesKey("version")] = 0
         }
 
@@ -93,6 +96,8 @@ class TextAppsWidget : GlanceAppWidget() {
 
     @Composable
     private fun AppButton(context: Context, display: String, packageName: String) {
+        val fontSize = currentState<Preferences>()[floatPreferencesKey("font_size")] ?: 32f
+
         Text(
             text = display,
             modifier = GlanceModifier.clickable(
@@ -107,7 +112,7 @@ class TextAppsWidget : GlanceAppWidget() {
                 color = GlanceTheme.colors.secondary,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp
+                fontSize = fontSize.sp
             )
         )
     }

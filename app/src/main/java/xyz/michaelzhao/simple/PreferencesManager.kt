@@ -22,6 +22,14 @@ class PreferencesManager(context: Context) {
         return prefs.getBoolean(getWidgetKey("widget_hide_", widgetId), false)
     }
 
+    fun saveFontSize(widgetId: Int, fontSize: Float) {
+        prefs.edit().putFloat(getWidgetKey("widget_font_", widgetId), fontSize).apply()
+    }
+
+    fun getFontSize(widgetId: Int): Float {
+        return prefs.getFloat(getWidgetKey("widget_font_", widgetId), 30f)
+    }
+
     fun getAppData(): String? {
         return prefs.getString("data", "")
     }

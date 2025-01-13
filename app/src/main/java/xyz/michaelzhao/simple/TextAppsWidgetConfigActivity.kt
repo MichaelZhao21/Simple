@@ -74,6 +74,7 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
 
         val prevNumber = preferencesManager.getNumber(appWidgetId)
         val prevHide = preferencesManager.getHidePage(appWidgetId)
+        val prevFontSize = preferencesManager.getFontSize(appWidgetId)
 
         setResult(RESULT_CANCELED)
 
@@ -82,13 +83,16 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
                 ConfigurationScreen(
                     prevNumber,
                     prevHide,
-                    onSave = { numberText: String, hidePageNumber: Boolean ->
+                    prevFontSize,
+                    onSave = { numberText: String, hidePageNumber: Boolean, fontSizeText: String ->
                         lifecycleScope.launch {
                             // Save number
-                            val number =
-                                numberText.toInt() // TODO: catch conversion error or make sure it doesn't happen
+                            // TODO: catch conversion error or make sure it doesn't happen
+                            val number = numberText.toInt()
+                            val fontSize = fontSizeText.toFloat()
                             preferencesManager.saveNumber(appWidgetId, number)
                             preferencesManager.saveHidePage(appWidgetId, hidePageNumber)
+                            preferencesManager.saveFontSize(appWidgetId, fontSize)
 
                             // Update widget
                             try {
@@ -120,9 +124,15 @@ class TextAppsWidgetConfigActivity : ComponentActivity() {
 }
 
 @Composable
-fun ConfigurationScreen(prevNumber: Int, prevHide: Boolean, onSave: (String, Boolean) -> Unit) {
+fun ConfigurationScreen(
+    prevNumber: Int,
+    prevHide: Boolean,
+    prevFontSize: Float,
+    onSave: (String, Boolean, String) -> Unit
+) {
     var numberText by remember { mutableStateOf(prevNumber.toString()) }
     var hidePageNumber by remember { mutableStateOf(prevHide) }
+    var fontSizeText by remember { mutableStateOf(prevFontSize.toString()) }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var expanded by remember { mutableStateOf(false) }
     val data = DataManager(LocalContext.current).loadData()
@@ -197,6 +207,12 @@ fun ConfigurationScreen(prevNumber: Int, prevHide: Boolean, onSave: (String, Boo
                             }
                         }
                     }
+                    OutlinedTextField(
+                        value = fontSizeText,
+                        onValueChange = { fontSizeText = it },
+                        label = { Text("Font Size (default = 30)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -207,7 +223,7 @@ fun ConfigurationScreen(prevNumber: Int, prevHide: Boolean, onSave: (String, Boo
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        { onSave(numberText, hidePageNumber) },
+                        { onSave(numberText, hidePageNumber, fontSizeText) },
                         enabled = numberText.isNotBlank() && !fieldErr
                     ) {
                         Text("Save")
